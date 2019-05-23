@@ -23052,6 +23052,11 @@ wave soldering</description>
 <wire x1="-10.16" y1="185.96" x2="-10.16" y2="192.58" width="0.1524" layer="91"/>
 <label x="-8.78" y="189.04" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="U$1" gate="G$1" pin="3.3V1"/>
+<wire x1="124.46" y1="91.44" x2="124.46" y2="88.9" width="0.1524" layer="91"/>
+<label x="127" y="86.36" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="N$12" class="0">
 <segment>
