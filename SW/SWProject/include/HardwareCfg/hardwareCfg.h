@@ -29,6 +29,8 @@
 #define PowerLed_GPIO_Port GPIOB
 #define DisableMotorDriver_Pin GPIO_PIN_15
 #define DisableMotorDriver_GPIO_Port GPIOB
+#define InputUserRequestButton_Pin GPIO_PIN_3
+#define InputUserRequestButton_GPIO_Port GPIOA
 
 /*
  Extern Variables
@@ -44,5 +46,7 @@ void MX_TIM4_Init(void);
 void MX_ADC1_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+void basicStartTIM4(void);
+void basicReadInputs(void);
 
 #endif /* INCLUDE_HARDWARECFG_HARDWARECFG_H_ */

@@ -7,3 +7,69 @@
 
 #include "stm32f1xx_hal.h"
 
+#include "basicLEDDriverSWC.h"
+
+#include "hardwareCfg.h"
+
+#include "interfaces.h"
+
+uint8_t basicGlobalLedDriver(uint32_t time) {
+
+	static previousTime=0;
+
+	if(redLedBlinking & MaskRedLedFastBlinking){
+		/*fast blink red led*/
+		if((HAL_GetTick()-time) > LedFastBlinkTimeInms)) {
+
+			HAL_GPIO_TogglePin(RedLed_GPIO_Port,RedLed_Pin);
+		}
+
+	}
+
+	else if(redLedBlinking & MaskRedLedSlowBlinking){
+		 /*slow blink red led*/
+		if((HAL_GetTick()-time) > LedSlowBlinkTimeInms)) {
+
+			HAL_GPIO_TogglePin(RedLed_GPIO_Port,RedLed_Pin);
+		}
+
+	}
+	else if(redLedBlinking==0) {
+
+		/* no error, red led off*/
+		HAL_GPIO_WritePin(RedLed_GPIO_Port,RedLed_Pin,GPIO_PIN_RESET);
+	}
+
+	if(MotorRotationRequest_sig){
+			/*slow blink green led*/
+			if((HAL_GetTick()-time) > LedSlowBlinkTimeInms )) {
+
+				HAL_GPIO_TogglePin(GreenLed_GPIO_Port,GreenLed_Pin);
+			}
+
+		}
+
+		else if(!MotorRotationRequest_sig) {
+			 /*green led on when motor is off*/
+
+			HAL_GPIO_WritePin(GreenLed_GPIO_Port,GreenLed_Pin,GPIO_PIN_SET);
+
+		}
+
+	if(AmbientLightRequest_sig){
+			/*Ambient Led on*/
+
+			HAL_GPIO_WritePin(PowerLed_GPIO_Port,PowerLed_Pin,GPIO_PIN_SET);
+		}
+
+		else {
+			/*Ambient Led off*/
+
+			HAL_GPIO_WritePin(PowerLed_GPIO_Port,PowerLed_Pin,GPIO_PIN_RESET);
+
+		}
+
+	previousTime=time;
+
+	return 0;
+}

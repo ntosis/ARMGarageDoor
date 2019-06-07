@@ -64,8 +64,8 @@ osThreadId defaultTaskHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void Task500ms(void const * argument);
-
+void Task50ms(void const * argument);
+void Task100ms(void const * argument);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -107,7 +107,7 @@ int main(void)
   MX_TIM4_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-
+  basicStartTIM4();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -124,11 +124,12 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, Task500ms, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, Task100ms, osPriorityNormal, 0, 512);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+  osThreadDef(Task50ms_, Task50ms, osPriorityAboveNormal, 0, 512);
+  defaultTaskHandle = osThreadCreate(osThread(Task50ms_), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -164,20 +165,47 @@ int main(void)
 
 
 /* USER CODE BEGIN 4 */
+void Task50ms(void const * argument)
+{
 
+	portTickType xLastWakeTime;
+	    const portTickType xDelay = 50 / portTICK_RATE_MS;
+	    // Initialise the xLastWakeTime variable with the current time.
+	         xLastWakeTime = xTaskGetTickCount ();
+			while(1) {
+
+				basicReadInputs();
+
+				basicGlobalLedDriver(HAL_GetTick());
+
+
+				// Wait for the next cycle.
+				vTaskDelayUntil( &xLastWakeTime, xDelay );
+			}
+
+}
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
-void Task500ms(void const * argument)
+void Task100ms(void const * argument)
 {
 
   /* USER CODE BEGIN 5 */
 	portTickType xLastWakeTime;
-	    const portTickType xDelay = 500 / portTICK_RATE_MS;
+	    const portTickType xDelay = 100 / portTICK_RATE_MS;
 	    // Initialise the xLastWakeTime variable with the current time.
 	         xLastWakeTime = xTaskGetTickCount ();
-
 			while(1) {
+
+				basicReadADCRawValues();
+
+				basicADCErrorHandler();
+
+				basicCheckGlobalErrors();
+
+				//step();
+
+				basicMotorTask();
 
 				// Wait for the next cycle.
 				vTaskDelayUntil( &xLastWakeTime, xDelay );

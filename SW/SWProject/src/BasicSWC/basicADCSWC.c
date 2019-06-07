@@ -12,6 +12,8 @@
 
 #include "basicErrorHandlerSWC.h"
 
+#include "interfaces.h"
+
 
 struct ADCErrorStruct {
 
@@ -25,16 +27,32 @@ struct ADCErrorStruct {
 
 } ADCErrorStruct_Tag;
 
+struct ADCMeasurment {
+
+	uint16_t ADCRawIPROP1Value;
+
+	uint16_t ADCRawIPROP2Value;
+
+	uint16_t ADCRawUserSetMtrSpd;
+
+} ADCMeasurment_Tag;
+
 struct ADCErrorStruct ADCErrorStruct_;
+
+struct ADCMeasurment ADCMeasurment_;
 
 void basicReadADCRawValues()
 {
+	basicReadADCRawIPROP();
+
+	basicReadADCRawUserMtrSpeed();
+
+	MotorCurrentADCRawValue_sig = ADCMeasurment_.ADCRawIPROP1Value;
 
 }
 
 void basicReadADCRawIPROP(void){
 
- uint16_t adc1=0, adc2=0, adc3 =0;
  uint32_t tickstart = 0U;
 
  /* Get tick count */
@@ -65,7 +83,7 @@ HAL_ADC_Start(&hadc1);
      if(__HAL_ADC_GET_FLAG(&hadc1, ADC_FLAG_EOC))
      {
 
-		adc1 = HAL_ADC_GetValue(&hadc1);
+    	 ADCMeasurment_.ADCRawIPROP1Value = HAL_ADC_GetValue(&hadc1);
 
 
 	    break;
@@ -110,7 +128,7 @@ while(1){
     	if(__HAL_ADC_GET_FLAG(&hadc1, ADC_FLAG_EOC))
     	{
 
-    		adc2 = HAL_ADC_GetValue(&hadc1);
+    		ADCMeasurment_.ADCRawIPROP2Value = HAL_ADC_GetValue(&hadc1);
 
 
 			break;
@@ -149,7 +167,7 @@ uint32_t basicGetErrorADCLastEntryIPROPx(void) {
 }
 
 void basicReadADCRawUserMtrSpeed(void) {
-	 uint16_t adc1=0, adc2=0, adc3 =0;
+
 	 uint32_t tickstart = 0U;
 
 	 /* Get tick count */
@@ -180,7 +198,7 @@ void basicReadADCRawUserMtrSpeed(void) {
 	     if(__HAL_ADC_GET_FLAG(&hadc1, ADC_FLAG_EOC))
 	     {
 
-			adc1 = HAL_ADC_GetValue(&hadc1);
+	    	 ADCMeasurment_.ADCRawUserSetMtrSpd = map(HAL_ADC_GetValue(&hadc1),0,4096,0,327);
 
 
 		    break;
@@ -241,4 +259,23 @@ void basicADCErrorHandler(void){
 		*/
 		basicGlobalErrorState |= (1 << (MaskGlobalErrorADCStatusUserMotorSpd));
 	}
+}
+
+uint16_t basicGetADCRawValueUserMotorSpd(void) {
+
+
+	return ADCMeasurment_.ADCRawUserSetMtrSpd;
+
+}
+
+void basicSetADCRawValueUserMotorSpd(uint16_t val) {
+
+
+	ADCMeasurment_.ADCRawUserSetMtrSpd=val;
+
+}
+
+uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

@@ -11,8 +11,12 @@
 #define MaskRedLedFastBlinking ((uint8_t)(0x01U))
 #define MaskRedLedSlowBlinking ((uint8_t)(0x02U))
 
-extern uint8_t redLedBlinking;
+#define LedFastBlinkTimeInms ((uint16_t)(250U)
+#define LedSlowBlinkTimeInms ((uint16_t)(500U)
 
+
+extern uint8_t redLedBlinking;
+uint8_t basicGlobalLedDriver(uint32_t time);
 
 
 #endif /* INCLUDE_BASICSWC_BASICLEDDRIVERSWC_H_ */

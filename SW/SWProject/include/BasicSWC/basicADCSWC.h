@@ -21,8 +21,11 @@ uint32_t basicGetErrorADCLastEntryIPROPx(void);
 void basicReadADCRawUserMtrSpeed(void);
 void basicADCErrorHandler(void);
 uint8_t basicGetErrorADCStatusUserMotorSpd(void);
+void basicSetADCRawValueUserMotorSpd(uint16_t val);
+uint16_t basicGetADCRawValueUserMotorSpd(void);
+uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max);
+void basicSetADCRawValueUserMotorSpd(uint16_t val);
 
-struct ADCErrorStruct ADCErrorStruct_;
 
 
 

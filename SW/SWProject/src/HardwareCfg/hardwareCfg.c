@@ -6,6 +6,8 @@
  */
 #include "hardwareCfg.h"
 
+#include "interfaces.h"
+
 ADC_HandleTypeDef hadc1;
 
 TIM_HandleTypeDef htim4;
@@ -133,10 +135,10 @@ void MX_TIM4_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 0;
+  htim4.Init.Prescaler = 20;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 0;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.Period = 327;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
   {
@@ -154,6 +156,7 @@ void MX_TIM4_Init(void)
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -205,4 +208,24 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+}
+
+void basicStartTIM4(void) {
+
+    HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);
+
+    HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);
+
+    __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_3,(uint16_t)0);
+
+    __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_4,(uint16_t)0);
+}
+
+void basicReadInputs(void) {
+
+	/* Read users button request */
+	StartStopUserRequest_sig = HAL_GPIO_ReadPin(InputUserRequestButton_GPIO_Port, InputUserRequestButton_Pin);
+
+	/* Read hardware drv8873 input failure status */
+	HBridgeFailureCode_sig = HAL_GPIO_ReadPin(nFaultInput_GPIO_Port, nFaultInput_Pin);
 }
