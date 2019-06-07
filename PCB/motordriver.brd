@@ -3406,7 +3406,7 @@ design rules under a new name.</description>
 <attribute name="MOUSER" value="583-1N5232B-B" x="90.1" y="61.4" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
 <element name="R13" library="myLibrary" package="0805" value="160" x="60.45" y="63.6"/>
-<element name="C10" library="rcl" library_urn="urn:adsk.eagle:library:334" package="C0805K" package3d_urn="urn:adsk.eagle:package:23681/2" value="" x="73.1774" y="33.02" rot="R270">
+<element name="C10" library="rcl" library_urn="urn:adsk.eagle:library:334" package="C0805K" package3d_urn="urn:adsk.eagle:package:23681/2" value="100nF" x="73.1774" y="33.02" rot="R270">
 <attribute name="SPICEPREFIX" value="C" x="73.1774" y="33.02" size="1.778" layer="27" rot="R270" display="off"/>
 </element>
 </elements>
