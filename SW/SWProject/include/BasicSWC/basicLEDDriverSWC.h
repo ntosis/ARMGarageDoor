@@ -11,8 +11,8 @@
 #define MaskRedLedFastBlinking ((uint8_t)(0x01U))
 #define MaskRedLedSlowBlinking ((uint8_t)(0x02U))
 
-#define LedFastBlinkTimeInms ((uint16_t)(250U)
-#define LedSlowBlinkTimeInms ((uint16_t)(500U)
+#define LedFastBlinkTimeInms ((uint16_t)(150U))
+#define LedSlowBlinkTimeInms ((uint16_t)(500U))
 
 
 extern uint8_t redLedBlinking;

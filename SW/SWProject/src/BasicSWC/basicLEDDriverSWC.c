@@ -15,25 +15,31 @@
 
 uint8_t basicGlobalLedDriver(uint32_t time) {
 
-	static previousTime=0;
+	static uint32_t previousTime=0;
+	static int16_t LedFastBlinkCounter = (int16_t) LedFastBlinkTimeInms;
+	static int16_t LedSlowBlinkCounter = (int16_t) LedSlowBlinkTimeInms;
 
-	if(redLedBlinking & MaskRedLedFastBlinking){
+	LedFastBlinkCounter -= (int16_t) (time - previousTime);
+	LedSlowBlinkCounter -= (int16_t) (time - previousTime);
+
+	if(redLedBlinking & (1<<MaskRedLedFastBlinking)){
 		/*fast blink red led*/
-		if((HAL_GetTick()-time) > LedFastBlinkTimeInms)) {
+		if(LedFastBlinkCounter <= 0) {
 
 			HAL_GPIO_TogglePin(RedLed_GPIO_Port,RedLed_Pin);
 		}
 
 	}
 
-	else if(redLedBlinking & MaskRedLedSlowBlinking){
+	else if(redLedBlinking & (1<<MaskRedLedSlowBlinking)){
 		 /*slow blink red led*/
-		if((HAL_GetTick()-time) > LedSlowBlinkTimeInms)) {
+		if(LedSlowBlinkCounter <= 0) {
 
 			HAL_GPIO_TogglePin(RedLed_GPIO_Port,RedLed_Pin);
 		}
 
 	}
+
 	else if(redLedBlinking==0) {
 
 		/* no error, red led off*/
@@ -42,34 +48,38 @@ uint8_t basicGlobalLedDriver(uint32_t time) {
 
 	if(MotorRotationRequest_sig){
 			/*slow blink green led*/
-			if((HAL_GetTick()-time) > LedSlowBlinkTimeInms )) {
+			if(LedSlowBlinkCounter <= 0) {
 
 				HAL_GPIO_TogglePin(GreenLed_GPIO_Port,GreenLed_Pin);
 			}
 
 		}
 
-		else if(!MotorRotationRequest_sig) {
+	else if(!MotorRotationRequest_sig) {
 			 /*green led on when motor is off*/
 
 			HAL_GPIO_WritePin(GreenLed_GPIO_Port,GreenLed_Pin,GPIO_PIN_SET);
 
 		}
 
-	if(AmbientLightRequest_sig){
-			/*Ambient Led on*/
+/*	if(AmbientLightRequest_sig){
+			Ambient Led on
 
 			HAL_GPIO_WritePin(PowerLed_GPIO_Port,PowerLed_Pin,GPIO_PIN_SET);
 		}
 
-		else {
-			/*Ambient Led off*/
+	else if(!AmbientLightRequest_sig) {
+			Ambient Led off
 
 			HAL_GPIO_WritePin(PowerLed_GPIO_Port,PowerLed_Pin,GPIO_PIN_RESET);
 
-		}
+		}*/
 
 	previousTime=time;
+
+	if(LedFastBlinkCounter <= 0) { LedFastBlinkCounter = (int16_t) LedFastBlinkTimeInms; }
+
+	if(LedSlowBlinkCounter <= 0) { LedSlowBlinkCounter = (int16_t) LedSlowBlinkTimeInms;}
 
 	return 0;
 }

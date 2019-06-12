@@ -47,7 +47,7 @@ void basicReadADCRawValues()
 
 	basicReadADCRawUserMtrSpeed();
 
-	MotorCurrentADCRawValue_sig = ADCMeasurment_.ADCRawIPROP1Value;
+	MotorCurrentADCRawValue_sig = ADCMeasurment_.ADCRawIPROP1Value + ADCMeasurment_.ADCRawIPROP2Value;
 
 }
 

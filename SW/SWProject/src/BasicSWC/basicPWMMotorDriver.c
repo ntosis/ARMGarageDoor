@@ -17,6 +17,8 @@
 
 #include "basicADCSWC.h"
 
+static uint8_t isDriverinSleepMode = 1;
+
 void basicMotorTask(void) {
 
 	/* Application Software requests motor rotation and error is not set*/
@@ -35,11 +37,17 @@ void basicMotorTask(void) {
 
 void basicStartMotor(void){
 
+	if(isDriverinSleepMode) {
 	/* nSleep To exit a low-power sleep mode, set this pin logic high.*/
 	HAL_GPIO_WritePin(NSLeepMotorDriver_GPIO_Port,NSLeepMotorDriver_Pin,GPIO_PIN_SET);
 
 	/* Bridge enable input. A logic low on this pin enables the H-bridge Hi-Z. Internal pullup to DVDD */
 	HAL_GPIO_WritePin(DisableMotorDriver_GPIO_Port,DisableMotorDriver_Pin,GPIO_PIN_RESET);
+
+	/*reset sleep mode*/
+	isDriverinSleepMode=0;
+
+	}
 
 	/* EN/IN1 PH/IN2 OUT1 OUT2
 	 * 0      1      L    H
@@ -73,11 +81,13 @@ void basicStartMotor(void){
 
 
 }
-void basicStopMotor(void){
+void basicStopMotor(void) {
 
 	/* nSleep To enter a low-power sleep mode, set this pin logic low.*/
 	HAL_GPIO_WritePin(NSLeepMotorDriver_GPIO_Port,NSLeepMotorDriver_Pin,GPIO_PIN_RESET);
 
 	/* Bridge enable input. A logic high on this pin disables the H-bridge Hi-Z. Internal pullup to DVDD */
 	HAL_GPIO_WritePin(DisableMotorDriver_GPIO_Port,DisableMotorDriver_Pin,GPIO_PIN_SET);
+
+	isDriverinSleepMode = 1;
 }

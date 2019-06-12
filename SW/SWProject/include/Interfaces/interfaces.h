@@ -7,6 +7,7 @@
 
 #ifndef INCLUDE_INTERFACES_INTERFACES_H_
 #define INCLUDE_INTERFACES_INTERFACES_H_
+#include <stdint.h>
 
 extern unsigned char AmbientLightRequest_sig;
 extern unsigned char ApplicationInternalError_sig;

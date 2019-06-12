@@ -39,6 +39,7 @@ extern ADC_HandleTypeDef hadc1;
 
 extern TIM_HandleTypeDef htim4;
 
+extern IWDG_HandleTypeDef hiwdg;
 
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
@@ -48,5 +49,6 @@ void MX_ADC1_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void basicStartTIM4(void);
 void basicReadInputs(void);
+void MX_IWDG_Init(void);
 
 #endif /* INCLUDE_HARDWARECFG_HARDWARECFG_H_ */

@@ -22763,8 +22763,8 @@ diameter 2.54 mm, horizontal, grid 10.16 mm</description>
 <part name="C4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1206K" package3d_urn="urn:adsk.eagle:package:23682/2" value="47nF"/>
 <part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1206K" package3d_urn="urn:adsk.eagle:package:23682/2" value="1uF"/>
 <part name="SUPPLY5" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="GND" device=""/>
-<part name="R5" library="myLibrary" deviceset="RESISTOR" device="0805_SMD" value="420 Ohm"/>
-<part name="R6" library="myLibrary" deviceset="RESISTOR" device="0805_SMD" value="420 Ohm"/>
+<part name="R5" library="myLibrary" deviceset="RESISTOR" device="0805_SMD" value="402 Ohm"/>
+<part name="R6" library="myLibrary" deviceset="RESISTOR" device="0805_SMD" value="402 Ohm"/>
 <part name="JMP1" library="jump-0r-smd" library_urn="urn:adsk.eagle:library:251" deviceset="0R-JUMP" device="A" package3d_urn="urn:adsk.eagle:package:15385/1"/>
 <part name="SUPPLY6" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="GND" device=""/>
 <part name="JMP2" library="jump-0r-smd" library_urn="urn:adsk.eagle:library:251" deviceset="0R-JUMP" device="A" package3d_urn="urn:adsk.eagle:package:15385/1"/>

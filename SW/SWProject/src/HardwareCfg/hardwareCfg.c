@@ -12,7 +12,7 @@ ADC_HandleTypeDef hadc1;
 
 TIM_HandleTypeDef htim4;
 
-
+IWDG_HandleTypeDef hiwdg;
 
 
 void SystemClock_Config(void)
@@ -190,8 +190,8 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, NSLeepMotorDriver_Pin|RedLed_Pin|GreenLed_Pin|PowerLed_Pin
-                          |DisableMotorDriver_Pin|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RedLed_Pin|GreenLed_Pin|PowerLed_Pin
+                          |GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : nFaultInput_Pin */
   GPIO_InitStruct.Pin = nFaultInput_Pin;
@@ -208,6 +208,14 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+
+  /* init States of motor driver */
+	/* nSleep To enter a low-power sleep mode, set this pin logic low.*/
+	HAL_GPIO_WritePin(NSLeepMotorDriver_GPIO_Port,NSLeepMotorDriver_Pin,GPIO_PIN_RESET);
+
+	/* Bridge enable input. A logic high on this pin disables the H-bridge Hi-Z. Internal pullup to DVDD */
+	HAL_GPIO_WritePin(DisableMotorDriver_GPIO_Port,DisableMotorDriver_Pin,GPIO_PIN_SET);
+
 }
 
 void basicStartTIM4(void) {
@@ -223,9 +231,22 @@ void basicStartTIM4(void) {
 
 void basicReadInputs(void) {
 
-	/* Read users button request */
-	StartStopUserRequest_sig = HAL_GPIO_ReadPin(InputUserRequestButton_GPIO_Port, InputUserRequestButton_Pin);
+	/* Read users button request, invert the input cause of pull up resistor */
+	StartStopUserRequest_sig = !(HAL_GPIO_ReadPin(InputUserRequestButton_GPIO_Port, InputUserRequestButton_Pin));
 
-	/* Read hardware drv8873 input failure status */
-	HBridgeFailureCode_sig = HAL_GPIO_ReadPin(nFaultInput_GPIO_Port, nFaultInput_Pin);
+	/* Read hardware drv8873 input failure status. invert the input. Hardware low logic means error */
+	HBridgeFailureCode_sig = !(HAL_GPIO_ReadPin(nFaultInput_GPIO_Port, nFaultInput_Pin));
+}
+/* IWDG init function */
+void MX_IWDG_Init(void)
+{
+
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_16;
+  hiwdg.Init.Reload = 30;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
 }

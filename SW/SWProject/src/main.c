@@ -53,6 +53,11 @@
 #include "stm32f1xx_hal.h"
 #include "cmsis_os.h"
 #include "hardwareCfg.h"
+#include "basicLEDDriverSWC.h"
+#include "basicADCSWC.h"
+#include "basicErrorHandlerSWC.h"
+#include "basicPWMMotorDriver.h"
+#include "MainApplicationSystem.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -61,6 +66,7 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 osThreadId defaultTaskHandle;
+osThreadId Task50mskHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -106,8 +112,10 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM4_Init();
   MX_ADC1_Init();
+//  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   basicStartTIM4();
+  MainApplicationSystem_initialize();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -124,16 +132,19 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, Task100ms, osPriorityNormal, 0, 512);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  osThreadDef(Task50ms_, Task50ms, osPriorityRealtime, 0, 512);
+  Task50mskHandle = osThreadCreate(osThread(Task50ms_), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  osThreadDef(Task50ms_, Task50ms, osPriorityAboveNormal, 0, 512);
-  defaultTaskHandle = osThreadCreate(osThread(Task50ms_), NULL);
+  osThreadDef(defaultTask, Task100ms, osPriorityRealtime, 0, 512);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+/*  __HAL_RCC_DBGMCU_CLK_ENABLE();
+  __HAL_DBGMCU_FREEZE_IWDG();
+  __HAL_IWDG_START(&hiwdg);*/
   /* USER CODE END RTOS_QUEUES */
  
 
@@ -167,12 +178,16 @@ int main(void)
 /* USER CODE BEGIN 4 */
 void Task50ms(void const * argument)
 {
+	/* Prevent unused argument(s) compilation warning */
+	UNUSED(argument);
 
 	portTickType xLastWakeTime;
 	    const portTickType xDelay = 50 / portTICK_RATE_MS;
 	    // Initialise the xLastWakeTime variable with the current time.
 	         xLastWakeTime = xTaskGetTickCount ();
 			while(1) {
+				/*  Update the time interface for the application module*/
+				HAL_getMstime_sig = HAL_GetTick();
 
 				basicReadInputs();
 
@@ -189,7 +204,8 @@ void Task50ms(void const * argument)
 /* StartDefaultTask function */
 void Task100ms(void const * argument)
 {
-
+	/* Prevent unused argument(s) compilation warning */
+	UNUSED(argument);
   /* USER CODE BEGIN 5 */
 	portTickType xLastWakeTime;
 	    const portTickType xDelay = 100 / portTICK_RATE_MS;
@@ -197,16 +213,26 @@ void Task100ms(void const * argument)
 	         xLastWakeTime = xTaskGetTickCount ();
 			while(1) {
 
+				static unsigned char internalTaskCounter = 0;
+
 				basicReadADCRawValues();
 
 				basicADCErrorHandler();
 
 				basicCheckGlobalErrors();
 
-				//step();
+				MainApplicationSystem_step();
 
 				basicMotorTask();
 
+				if(internalTaskCounter>0) {
+					/* refresh IWDG*/
+					//HAL_IWDG_Refresh(&hiwdg);
+
+					internalTaskCounter = 0;
+				}
+
+				internalTaskCounter++;
 				// Wait for the next cycle.
 				vTaskDelayUntil( &xLastWakeTime, xDelay );
 			}
@@ -220,6 +246,8 @@ void Task100ms(void const * argument)
   */
 void _Error_Handler(char *file, int line)
 {
+  /* Prevent unused argument(s) compilation warning */
+	UNUSED(line); UNUSED(file);
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   while(1)
