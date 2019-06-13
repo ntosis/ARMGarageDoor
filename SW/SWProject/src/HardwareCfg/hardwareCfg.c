@@ -25,10 +25,11 @@ void SystemClock_Config(void)
 
 	    /**Initializes the CPU, AHB and APB busses clocks
 	    */
-	  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
 	  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
 	  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
 	  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 	  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 	  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
@@ -98,7 +99,7 @@ void MX_ADC1_Init(void)
       */
     sConfig.Channel = ADC_CHANNEL_1;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;;
+    sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;;
     if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
     {
       _Error_Handler(__FILE__, __LINE__);
@@ -108,7 +109,7 @@ void MX_ADC1_Init(void)
       */
     sConfig.Channel = ADC_CHANNEL_2;
     sConfig.Rank = ADC_REGULAR_RANK_2;
-    sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;;
+    sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;;
     if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
     {
       _Error_Handler(__FILE__, __LINE__);
@@ -118,7 +119,7 @@ void MX_ADC1_Init(void)
       */
     sConfig.Channel = ADC_CHANNEL_8;
     sConfig.Rank = ADC_REGULAR_RANK_3;
-    sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+    sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
     if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
     {
       _Error_Handler(__FILE__, __LINE__);
@@ -189,9 +190,7 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RedLed_Pin|GreenLed_Pin|PowerLed_Pin
-                          |GPIO_PIN_5, GPIO_PIN_RESET);
+
 
   /*Configure GPIO pin : nFaultInput_Pin */
   GPIO_InitStruct.Pin = nFaultInput_Pin;
@@ -208,7 +207,9 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-
+  /*Configure GPIO pin Output Level */
+   HAL_GPIO_WritePin(GPIOB, RedLed_Pin|GreenLed_Pin|PowerLed_Pin
+                           |GPIO_PIN_5, GPIO_PIN_RESET);
   /* init States of motor driver */
 	/* nSleep To enter a low-power sleep mode, set this pin logic low.*/
 	HAL_GPIO_WritePin(NSLeepMotorDriver_GPIO_Port,NSLeepMotorDriver_Pin,GPIO_PIN_RESET);
@@ -242,7 +243,7 @@ void MX_IWDG_Init(void)
 {
 
   hiwdg.Instance = IWDG;
-  hiwdg.Init.Prescaler = IWDG_PRESCALER_16;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_256;
   hiwdg.Init.Reload = 30;
   if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
   {

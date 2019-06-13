@@ -62,18 +62,20 @@ uint8_t basicGlobalLedDriver(uint32_t time) {
 
 		}
 
-/*	if(AmbientLightRequest_sig){
-			Ambient Led on
+	if(AmbientLightRequest_sig){
+
+			/*Ambient Led on*/
 
 			HAL_GPIO_WritePin(PowerLed_GPIO_Port,PowerLed_Pin,GPIO_PIN_SET);
 		}
 
 	else if(!AmbientLightRequest_sig) {
-			Ambient Led off
+
+			/*Ambient Led off*/
 
 			HAL_GPIO_WritePin(PowerLed_GPIO_Port,PowerLed_Pin,GPIO_PIN_RESET);
 
-		}*/
+		}
 
 	previousTime=time;
 

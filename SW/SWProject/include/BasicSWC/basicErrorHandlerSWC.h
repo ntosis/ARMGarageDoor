@@ -12,6 +12,7 @@
 #define MaskGlobalErrorADCStatusIPROPx ((uint8_t)0x01U) //0b001
 #define MaskGlobalErrorADCStatusUserMotorSpd ((uint8_t)0x02U) //0b010
 #define MaskHBridgeFailureCode ((uint8_t)0x04U) //0b100
+#define DebounceLEDErrorTimeInMS ((uint16_t)10000U)
 
 extern uint8_t basicGlobalErrorState;
 

@@ -21,19 +21,21 @@ uint8_t redLedBlinking=0;
 
 void basicCheckGlobalErrors(void){
 
+	uint32_t now = HAL_GetTick();
+	static uint32_t previousTime=0;
+
 	if(basicGlobalErrorState & (1<<MaskGlobalErrorADCStatusIPROPx)) {
 
-		/*TODO error led function and shut down*/
-		redLedBlinking |= (1 << MaskRedLedFastBlinking);
+
 		NVIC_SystemReset();
 
 		return;
+
 	}
 
 	else if(!(basicGlobalErrorState & (1<<MaskGlobalErrorADCStatusIPROPx))) {
 
-		/*reset the led blinking request*/
-		redLedBlinking &= ~(1 << MaskRedLedFastBlinking);
+
 
 	}
 
@@ -48,9 +50,12 @@ void basicCheckGlobalErrors(void){
 
 		/* HBridge error is reported from the Hardware. (nFault pin)*/
 		redLedBlinking |= (1 << MaskRedLedFastBlinking);
+
+		/* Update the previous time */
+			previousTime=now;
 	}
 
-	else if((HBridgeFailureCode_sig==0)) {
+	else if((HBridgeFailureCode_sig==0)&&((now - previousTime)>DebounceLEDErrorTimeInMS)){
 
 		/* Clear HBridge error, is reported from the Hardware. (nFault pin)*/
 		redLedBlinking &= ~(1 << MaskRedLedFastBlinking);
@@ -60,8 +65,11 @@ void basicCheckGlobalErrors(void){
 
 		/* Application Software error is reported*/
 		redLedBlinking |= (1 << MaskRedLedSlowBlinking);
+
+		/* Update the previous time */
+			previousTime=now;
 	}
-	else if(ApplicationInternalError_sig==0) {
+	else if((ApplicationInternalError_sig==0)&&((now - previousTime)>DebounceLEDErrorTimeInMS)) {
 
 		/* Clear  Application Software error*/
 		redLedBlinking &= ~(1 << MaskRedLedSlowBlinking);

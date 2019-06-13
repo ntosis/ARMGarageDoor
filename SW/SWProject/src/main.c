@@ -112,7 +112,7 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM4_Init();
   MX_ADC1_Init();
-//  MX_IWDG_Init();
+
   /* USER CODE BEGIN 2 */
   basicStartTIM4();
   MainApplicationSystem_initialize();
@@ -143,8 +143,9 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
 /*  __HAL_RCC_DBGMCU_CLK_ENABLE();
-  __HAL_DBGMCU_FREEZE_IWDG();
-  __HAL_IWDG_START(&hiwdg);*/
+  __HAL_DBGMCU_FREEZE_IWDG();*/
+  MX_IWDG_Init();
+  __HAL_IWDG_START(&hiwdg);
   /* USER CODE END RTOS_QUEUES */
  
 
@@ -227,7 +228,7 @@ void Task100ms(void const * argument)
 
 				if(internalTaskCounter>0) {
 					/* refresh IWDG*/
-					//HAL_IWDG_Refresh(&hiwdg);
+					HAL_IWDG_Refresh(&hiwdg);
 
 					internalTaskCounter = 0;
 				}
