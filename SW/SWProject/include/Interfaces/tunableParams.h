@@ -24,7 +24,7 @@
 /* Declaration for custom storage class: Const */
 extern const real32_T ADCResolutionmVproBit_C;
 extern const uint32_T AmbientLightOnTime_C;
-extern const uint8_T DebounceStepsToSetMinimumCurrError_C;
+extern const uint8_T DebounceStepsToSetminmaxCurrError_C;
 extern const uint16_T IPROPFactor_C;
 extern const uint16_T IpropResistorValue_C;
 extern const real32_T MaxMotorCurrent_C;
