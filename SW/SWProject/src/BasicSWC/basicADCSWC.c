@@ -199,7 +199,7 @@ void basicReadADCRawUserMtrSpeed(void) {
 	     {
 	    	 /* the speed potentiometer is in volatage divider setup, maximum voltage is 3.3 /2. That means also max adc value
 	    	  *ca. 4096 / 2 = 2300*/
-	    	 ADCMeasurment_.ADCRawUserSetMtrSpd = map(HAL_ADC_GetValue(&hadc1),0,2300,0,327);
+	    	 ADCMeasurment_.ADCRawUserSetMtrSpd = map(HAL_ADC_GetValue(&hadc1),0,2000,0,320);
 
 
 		    break;
