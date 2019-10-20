@@ -58,6 +58,7 @@
 #include "basicErrorHandlerSWC.h"
 #include "basicPWMMotorDriver.h"
 #include "MainApplicationSystem.h"
+#include "eeprom_em.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -114,6 +115,10 @@ int main(void)
   MX_ADC1_Init();
 
   /* USER CODE BEGIN 2 */
+  //format();
+  EE_Init(); /* init the eeprom emulation modul */
+  initCAL(); /* init the calibrations parameter */
+
   basicStartTIM4();
   MainApplicationSystem_initialize();
   /* USER CODE END 2 */

@@ -13,7 +13,9 @@
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 64K
+  /*FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 61K*/
+  /*2K eeprom emulation + 1k for sector0*/ 
+  FLASH (rx) : ORIGIN = 0x08000E00, LENGTH = 61K
   RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 20K
 
   /*
