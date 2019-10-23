@@ -52,8 +52,8 @@
 /* Global variable used to store variable value in read sequence */
 uint16_t DataVar = 0;
 
-/* Virtual address defined by the user: 0xFFFF value is prohibited */
-uint16_t VirtAddVarTab[NB_OF_VAR]={0x5555,0x7777,0x8888};
+
+
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -62,7 +62,7 @@ static uint16_t EE_FindValidPage(uint8_t Operation);
 static uint16_t EE_VerifyPageFullWriteVariable(uint16_t VirtAddress, uint16_t Data);
 static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data);
 static uint16_t EE_VerifyPageFullyErased(uint32_t Address);
-static uint16_t EE_PageTransferWriteBlock(uint16_t VirtAddress,  uint16_t *p);
+static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize ,uint16_t VirtAddress);
 static uint16_t EE_VerifyPageFullWriteBlock(uint16_t blockSize, void *p);
 
 /**
@@ -152,29 +152,21 @@ uint16_t EE_Init(void)
       if (PageStatus1 == VALID_PAGE) /* Page0 receive, Page1 valid */
       {
         /* Transfer data from Page1 to Page0 */
-        for (VarIdx = 0; VarIdx < NB_OF_VAR; VarIdx++)
-        {
-          if (( *(__IO uint16_t*)(PAGE0_BASE_ADDRESS + 6)) == VirtAddVarTab[VarIdx])
-          {
-            x = VarIdx;
-          }
-          if (VarIdx != x)
-          {
-            /* Read the last variables' updates */
-            ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
-            /* In case variable corresponding to the virtual address was found */
-            if (ReadStatus != 0x1)
-            {
-              /* Transfer the variable to the Page0 */
-              EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
-              /* If program operation was failed, a Flash error code is returned */
-              if (EepromStatus != HAL_OK)
-              {
-                return EepromStatus;
-              }
-            }
-          }
-        }
+
+    	/* First read from Valid Page to RAM */
+    	uint16_t retVal = EE_ReadBlockInEEm(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+    	/* 0: if variable was found
+    	 * 1: if the variable was not found
+    	 */
+    	if(retVal==0) {
+    	    /* Write the block to the Page0 */
+    	    EE_PageTransferWriteBlock(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+    	}
+    	else if(retVal==1) {
+    		/* Format Pages */
+    		FlashStatus = EE_Format();
+    		return FlashStatus;
+    	}
         /* Mark Page0 as valid */
         HAL_FLASH_Unlock();
         FlashStatus = HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, PAGE0_BASE_ADDRESS, VALID_PAGE);
@@ -274,29 +266,22 @@ uint16_t EE_Init(void)
       else /* Page0 valid, Page1 receive */
       {
         /* Transfer data from Page0 to Page1 */
-        for (VarIdx = 0; VarIdx < NB_OF_VAR; VarIdx++)
-        {
-          if ((*(__IO uint16_t*)(PAGE1_BASE_ADDRESS + 6)) == VirtAddVarTab[VarIdx])
-          {
-            x = VarIdx;
-          }
-          if (VarIdx != x)
-          {
-            /* Read the last variables' updates */
-            ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
-            /* In case variable corresponding to the virtual address was found */
-            if (ReadStatus != 0x1)
-            {
-              /* Transfer the variable to the Page1 */
-              EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
-              /* If program operation was failed, a Flash error code is returned */
-              if (EepromStatus != HAL_OK)
-              {
-                return EepromStatus;
-              }
-            }
-          }
-        }
+    	   /* First read from Valid Page to RAM */
+    	  uint16_t retVal = EE_ReadBlockInEEm(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+
+    	  /* Write the block to the Page1 */
+    	  /* 0: if variable was found
+    	   * 1: if the variable was not found
+    	   */
+    	   if(retVal==0) {
+    	      	    /* Write the block to the Page0 */
+    	       	    EE_PageTransferWriteBlock(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+    	       	}
+    	   else if(retVal==1) {
+    	       		/* Format Pages */
+    	       		FlashStatus = EE_Format();
+    	       		return FlashStatus;
+    	       	}
         /* Mark Page1 as valid */
         HAL_FLASH_Unlock();
         FlashStatus = HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, PAGE1_BASE_ADDRESS, VALID_PAGE);
@@ -877,9 +862,9 @@ static uint16_t EE_VerifyPageFullWriteBlock(uint16_t blockSize, void *p)
       FlashStatus = HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, Address+i,(uint16_t)(*(__IO uint32_t*)(p+i)));
       HAL_FLASH_Lock();
       /* If program operation was failed, a Flash error code is returned */
-		FlashStatus = (*(__IO uint32_t*)Address);
-		FlashStatus +=i;
-		if (FlashStatus == HAL_OK)
+/*		FlashStatus = (*(__IO uint32_t*)Address);
+		FlashStatus +=i;*/
+		if (FlashStatus != HAL_OK)
       {
         return FlashStatus;
       }
@@ -922,7 +907,7 @@ uint16_t EE_WriteBlock( void *p,  uint16_t blocksize,  uint16_t VirtAddress)
   if (Status == PAGE_FULL)
   {
     /* Perform Page transfer */
-    Status = EE_PageTransferWriteBlock(VirtAddress, p);
+    Status = EE_PageTransferWriteBlock(p,blocksize,VirtAddress);
   }
 
   /* Return last operation status */
@@ -939,11 +924,11 @@ uint16_t EE_WriteBlock( void *p,  uint16_t blocksize,  uint16_t VirtAddress)
   *           - NO_VALID_PAGE: if no valid page was found
   *           - Flash error code: on write Flash error
   */
-static uint16_t EE_PageTransferWriteBlock(uint16_t VirtAddress,  uint16_t *p)
+static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize ,uint16_t VirtAddress)
 {
   HAL_StatusTypeDef FlashStatus = HAL_OK;
   uint32_t NewPageAddress = EEPROM_START_ADDRESS;
-  uint16_t OldPageId=0;
+  uint32_t OldPageId=0;
   uint16_t ValidPage = PAGE0, VarIdx = 0;
   uint16_t EepromStatus = 0, ReadStatus = 0;
   uint32_t SectorError = 0;
@@ -984,7 +969,7 @@ static uint16_t EE_PageTransferWriteBlock(uint16_t VirtAddress,  uint16_t *p)
   }
 
   /* Write the variable passed as parameter in the new active page */
-  EepromStatus = EE_VerifyPageFullWriteBlock(VirtAddress, p);
+  EepromStatus = EE_VerifyPageFullWriteBlock(blockSize, p);
   /* If program operation was failed, a Flash error code is returned */
   if (EepromStatus != HAL_OK)
   {

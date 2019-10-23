@@ -115,7 +115,7 @@ int main(void)
   MX_ADC1_Init();
 
   /* USER CODE BEGIN 2 */
-  //format();
+  format();
   EE_Init(); /* init the eeprom emulation modul */
   initCAL(); /* init the calibrations parameter */
 

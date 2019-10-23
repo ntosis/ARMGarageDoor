@@ -94,6 +94,8 @@ Flash memory */
 /* Variables' number */
 #define NB_OF_VAR             ((uint8_t)0x03)
 
+uint16_t VirtAddVarTab[NB_OF_VAR];
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */

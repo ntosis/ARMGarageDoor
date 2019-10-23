@@ -8,7 +8,10 @@
 #ifndef EEPROM_CALIB_H_
 #define EEPROM_CALIB_H_
 
-#define _start 0x800C000
+#define _start 0x800C000 /*TODO delete it if not used */
+
+/* Virtual address defined by the user: 0xFFFF value is prohibited */
+#define VIRTUALL_ADDRESS_OF_STRUCT ((uint16_t)0x8888U)
 
 // Create structure
 typedef struct {
@@ -18,7 +21,7 @@ typedef struct {
     uint16_t K_P_Coolg;
     uint16_t K_I_Coolg;
     uint16_t K_D_Coolg;
-    uint16_t virtualAddress;
+    const uint16_t virtualAddress;
     uint8_t  oneLevelSystem_C;
     uint8_t smartCnt_C;
     uint8_t debugInfosFlag_C;
@@ -32,7 +35,7 @@ void copyInitCALtoRam(void);
 
 extern void  *pInitCAL;
 extern uint8_t *a_ptr;
-
+extern CAL_PARAM CALinRAM;;
 
 /*
 #define K_P_Htng (p->K_P_Htng)
