@@ -113,6 +113,7 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM4_Init();
   MX_ADC1_Init();
+  initCRC();
 
   /* USER CODE BEGIN 2 */
   format();

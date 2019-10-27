@@ -95,15 +95,15 @@ Flash memory */
 #define NB_OF_VAR             ((uint8_t)0x03)
 
 uint16_t VirtAddVarTab[NB_OF_VAR];
-
+void *memcpyuser (void *dest, const void *src, size_t len);
 /* Exported types ------------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 uint16_t EE_Init(void);
 uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data);
 uint16_t EE_WriteVariable(uint16_t VirtAddress, uint16_t Data);
-uint16_t EE_ReadBlockInEEm(CAL_PARAM *p,uint16_t blockSize,uint16_t VirtAddress);
-uint16_t EE_WriteBlock(void *p,uint16_t blocksize, uint16_t VirtAddress);
+uint16_t EE_ReadBlockInEEm(struct CAL_PARAM_tag *p,uint16_t blockSize,uint16_t VirtAddress);
+uint16_t EE_WriteBlock(struct CAL_PARAM_tag *EEblock,uint16_t blocksize);
 
 void format(void);
 

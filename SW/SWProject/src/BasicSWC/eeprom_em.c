@@ -43,6 +43,7 @@
 #include "stm32f1xx_hal.h"
 #include "eeprom_em.h"
 #include "eeprom_calib.h"
+#include "crcModule.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -62,7 +63,7 @@ static uint16_t EE_FindValidPage(uint8_t Operation);
 static uint16_t EE_VerifyPageFullWriteVariable(uint16_t VirtAddress, uint16_t Data);
 static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data);
 static uint16_t EE_VerifyPageFullyErased(uint32_t Address);
-static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize ,uint16_t VirtAddress);
+static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize);
 static uint16_t EE_VerifyPageFullWriteBlock(uint16_t blockSize, void *p);
 
 /**
@@ -154,13 +155,13 @@ uint16_t EE_Init(void)
         /* Transfer data from Page1 to Page0 */
 
     	/* First read from Valid Page to RAM */
-    	uint16_t retVal = EE_ReadBlockInEEm(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+    	uint16_t retVal = EE_ReadBlockInEEm(&CALinRAM,sizeof(struct CAL_PARAM_tag),VIRTUALL_ADDRESS_OF_STRUCT);
     	/* 0: if variable was found
     	 * 1: if the variable was not found
     	 */
     	if(retVal==0) {
     	    /* Write the block to the Page0 */
-    	    EE_PageTransferWriteBlock(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+    	    EE_PageTransferWriteBlock(&CALinRAM,sizeof(struct CAL_PARAM_tag));
     	}
     	else if(retVal==1) {
     		/* Format Pages */
@@ -267,7 +268,7 @@ uint16_t EE_Init(void)
       {
         /* Transfer data from Page0 to Page1 */
     	   /* First read from Valid Page to RAM */
-    	  uint16_t retVal = EE_ReadBlockInEEm(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+    	  uint16_t retVal = EE_ReadBlockInEEm(&CALinRAM,sizeof(struct CAL_PARAM_tag),VIRTUALL_ADDRESS_OF_STRUCT);
 
     	  /* Write the block to the Page1 */
     	  /* 0: if variable was found
@@ -275,7 +276,7 @@ uint16_t EE_Init(void)
     	   */
     	   if(retVal==0) {
     	      	    /* Write the block to the Page0 */
-    	       	    EE_PageTransferWriteBlock(&CALinRAM,sizeof(CAL_PARAM),VIRTUALL_ADDRESS_OF_STRUCT);
+    	       	    EE_PageTransferWriteBlock(&CALinRAM,sizeof(struct CAL_PARAM_tag));
     	       	}
     	   else if(retVal==1) {
     	       		/* Format Pages */
@@ -762,12 +763,12 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   *           - 1: if the variable was not found
   *           - NO_VALID_PAGE: if no valid page was found.
   */
-uint16_t EE_ReadBlockInEEm(CAL_PARAM *p,uint16_t blockSize,uint16_t VirtAddress)
+uint16_t EE_ReadBlockInEEm(struct CAL_PARAM_tag *p,uint16_t blockSize,uint16_t VirtAddress)
 {
   uint16_t ValidPage = PAGE0;
   uint16_t AddressValue = 0x5555, ReadStatus = 1, statusOfthisBlockTmp=0;
   uint32_t Address = EEPROM_START_ADDRESS, PageStartAddress = EEPROM_START_ADDRESS;
-  CAL_PARAM *pToEEprom;
+  struct CAL_PARAM_tag *pToEEprom;
 
   /* Get active Page for read operation */
   ValidPage = EE_FindValidPage(READ_FROM_VALID_PAGE);
@@ -790,17 +791,15 @@ uint16_t EE_ReadBlockInEEm(CAL_PARAM *p,uint16_t blockSize,uint16_t VirtAddress)
     /* Get the current location content to be compared with virtual address */
     //  AddressValue = (*(__IO uint16_t*)Address);
 	  pToEEprom = Address;
-	  if(Address==0x8000428) {
-		  volatile uint8_t a=0;
-	  }
+
     /* Compare the read address with the virtual address */
-    if (pToEEprom->virtualAddress == VirtAddress)
+    if (pToEEprom->data.virtualAddress == VirtAddress)
     {
 
       //for(int i=0;i<blockSize;i+=2) {
 
 	    // memcpy(p,Address+i,2);
-    	memcpy(p,pToEEprom,sizeof(CAL_PARAM));
+    	memcpy(p,pToEEprom,sizeof(struct CAL_PARAM_tag));
 	  //}
 
       /* In case variable value is read, reset ReadStatus flag */
@@ -896,9 +895,23 @@ static uint16_t EE_VerifyPageFullWriteBlock(uint16_t blockSize, void *p)
   *           - NO_VALID_PAGE: if no valid page was found
   *           - Flash error code: on write Flash error
   */
-uint16_t EE_WriteBlock( void *p,  uint16_t blocksize,  uint16_t VirtAddress)
+uint16_t EE_WriteBlock( struct CAL_PARAM_tag *EEblock,  uint16_t blocksize)
 {
   uint16_t Status = 0;
+  uint32_t crcValue=0;
+  void *p;
+  struct CAL_PARAM_tag localStruct;
+  /* fill local struct with zeros to avoid crc errors from the padding values*/
+
+  memset(&localStruct, (char)0, sizeof(struct CAL_PARAM_tag));
+
+  memcpy(&localStruct,EEblock,sizeof(struct CAL_PARAM_tag));
+
+  crcValue = calculateCRCfromStruct(&(EEblock->data));
+
+  localStruct.data_crc = crcValue;
+
+  p=&localStruct;
 
   /* Write the variable virtual address and value in the EEPROM */
   Status = EE_VerifyPageFullWriteBlock(blocksize, p);
@@ -907,12 +920,13 @@ uint16_t EE_WriteBlock( void *p,  uint16_t blocksize,  uint16_t VirtAddress)
   if (Status == PAGE_FULL)
   {
     /* Perform Page transfer */
-    Status = EE_PageTransferWriteBlock(p,blocksize,VirtAddress);
+    Status = EE_PageTransferWriteBlock(p,blocksize);
   }
 
   /* Return last operation status */
   return Status;
 }
+
 /**
   * @brief  Transfers last updated variables data from the full Page to
   *   an empty one.
@@ -924,7 +938,7 @@ uint16_t EE_WriteBlock( void *p,  uint16_t blocksize,  uint16_t VirtAddress)
   *           - NO_VALID_PAGE: if no valid page was found
   *           - Flash error code: on write Flash error
   */
-static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize ,uint16_t VirtAddress)
+static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize)
 {
   HAL_StatusTypeDef FlashStatus = HAL_OK;
   uint32_t NewPageAddress = EEPROM_START_ADDRESS;
