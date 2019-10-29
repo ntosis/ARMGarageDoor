@@ -43,9 +43,7 @@ struct CAL_PARAM_tag {
 
 
 void initCAL(void);
-void checkForaValidBlockInEEm(void);
-void copyBlockFromEEmtoRam(void);
-void copyInitCALtoRam(void);
+void writeStructToEEprom(void);
 
 extern void  *pInitCAL;
 extern uint8_t *a_ptr;

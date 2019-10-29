@@ -95,7 +95,6 @@ Flash memory */
 #define NB_OF_VAR             ((uint8_t)0x03)
 
 uint16_t VirtAddVarTab[NB_OF_VAR];
-void *memcpyuser (void *dest, const void *src, size_t len);
 /* Exported types ------------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
@@ -106,6 +105,26 @@ uint16_t EE_ReadBlockInEEm(struct CAL_PARAM_tag *p,uint16_t blockSize,uint16_t V
 uint16_t EE_WriteBlock(struct CAL_PARAM_tag *EEblock,uint16_t blocksize);
 
 void format(void);
+
+/* Failure codes */
+
+extern uint8_t FcdEEpromEmFailStatus;
+
+enum eepromEmuFailCodes {
+
+	FcdFlashError = (1U<<0),
+	FcdEEprmReadError = (1U<<1),
+	FcdEEprmWriteError = (1U<<2),
+	FcdEEprmPageNotFoundError = (1U<<3),
+	FcdEEprmPageFullError = (1U<<4),
+	FcdEEprmCRCError = (1U<<5),
+	FcdEEprmStructNotFoundError = (1U<<6),
+	FcdEEprmNoValidPageError = (1U<<7)
+
+
+};
+
+
 
 #endif /* __EEPROM_EM_H */
 

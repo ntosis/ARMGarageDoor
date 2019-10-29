@@ -109,6 +109,7 @@ uint16_t EE_Init(void)
           /* If erase operation was failed, a Flash error code is returned */
           if (FlashStatus != HAL_OK)
           {
+        	FcdEEpromEmFailStatus  |= FcdFlashError;
             return FlashStatus;
           }
         }
@@ -124,6 +125,7 @@ uint16_t EE_Init(void)
           /* If erase operation was failed, a Flash error code is returned */
           if (FlashStatus != HAL_OK)
           {
+        	FcdEEpromEmFailStatus  |= FcdFlashError;
             return FlashStatus;
           }
         }
@@ -134,6 +136,7 @@ uint16_t EE_Init(void)
         /* If program operation was failed, a Flash error code is returned */
         if (FlashStatus != HAL_OK)
         {
+          FcdEEpromEmFailStatus  |= FcdFlashError;
           return FlashStatus;
         }
       }
@@ -144,6 +147,7 @@ uint16_t EE_Init(void)
         /* If erase/program operation was failed, a Flash error code is returned */
         if (FlashStatus != HAL_OK)
         {
+          FcdEEpromEmFailStatus  |= FcdFlashError;
           return FlashStatus;
         }
       }
@@ -175,6 +179,7 @@ uint16_t EE_Init(void)
         /* If program operation was failed, a Flash error code is returned */
         if (FlashStatus != HAL_OK)
         {
+          FcdEEpromEmFailStatus  |= FcdFlashError;
           return FlashStatus;
         }
         pEraseInit.TypeErase = FLASH_TYPEERASE_PAGES;
@@ -190,6 +195,7 @@ uint16_t EE_Init(void)
           /* If erase operation was failed, a Flash error code is returned */
           if (FlashStatus != HAL_OK)
           {
+        	FcdEEpromEmFailStatus  |= FcdFlashError;
             return FlashStatus;
           }
         }
@@ -209,6 +215,7 @@ uint16_t EE_Init(void)
           /* If erase operation was failed, a Flash error code is returned */
           if (FlashStatus != HAL_OK)
           {
+        	FcdEEpromEmFailStatus  |= FcdFlashError;
             return FlashStatus;
           }
         }
@@ -219,6 +226,7 @@ uint16_t EE_Init(void)
         /* If program operation was failed, a Flash error code is returned */
         if (FlashStatus != HAL_OK)
         {
+          FcdEEpromEmFailStatus  |= FcdFlashError;
           return FlashStatus;
         }
       }
@@ -229,6 +237,7 @@ uint16_t EE_Init(void)
         /* If erase/program operation was failed, a Flash error code is returned */
         if (FlashStatus != HAL_OK)
         {
+          FcdEEpromEmFailStatus  |= FcdFlashError;
           return FlashStatus;
         }
       }
@@ -242,6 +251,7 @@ uint16_t EE_Init(void)
         /* If erase/program operation was failed, a Flash error code is returned */
         if (FlashStatus != HAL_OK)
         {
+          FcdEEpromEmFailStatus  |= FcdFlashError;
           return FlashStatus;
         }
       }
@@ -260,6 +270,7 @@ uint16_t EE_Init(void)
           /* If erase operation was failed, a Flash error code is returned */
           if (FlashStatus != HAL_OK)
           {
+        	FcdEEpromEmFailStatus  |= FcdFlashError;
             return FlashStatus;
           }
         }
@@ -290,6 +301,7 @@ uint16_t EE_Init(void)
         /* If program operation was failed, a Flash error code is returned */
         if (FlashStatus != HAL_OK)
         {
+          FcdEEpromEmFailStatus  |= FcdFlashError;
           return FlashStatus;
         }
         pEraseInit.PageAddress = PAGE0_ID;
@@ -304,6 +316,7 @@ uint16_t EE_Init(void)
           /* If erase operation was failed, a Flash error code is returned */
           if (FlashStatus != HAL_OK)
           {
+        	FcdEEpromEmFailStatus  |= FcdFlashError;
             return FlashStatus;
           }
         }
@@ -316,6 +329,7 @@ uint16_t EE_Init(void)
       /* If erase/program operation was failed, a Flash error code is returned */
       if (FlashStatus != HAL_OK)
       {
+    	FcdEEpromEmFailStatus  |= FcdFlashError;
         return FlashStatus;
       }
       break;
@@ -385,6 +399,7 @@ uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data)
   /* Check if there is no valid page */
   if (ValidPage == NO_VALID_PAGE)
   {
+	  FcdEEpromEmFailStatus  |= FcdEEprmNoValidPageError;
     return  NO_VALID_PAGE;
   }
 
@@ -407,6 +422,7 @@ uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data)
       *Data = (*(__IO uint16_t*)(Address - 2));
 
       /* In case variable value is read, reset ReadStatus flag */
+
       ReadStatus = 0;
 
       break;
@@ -475,6 +491,7 @@ static HAL_StatusTypeDef EE_Format(void)
     /* If erase operation was failed, a Flash error code is returned */
     if (FlashStatus != HAL_OK)
     {
+      FcdEEpromEmFailStatus |= FcdFlashError;
       return FlashStatus;
     }
   }
@@ -485,6 +502,7 @@ static HAL_StatusTypeDef EE_Format(void)
   /* If program operation was failed, a Flash error code is returned */
   if (FlashStatus != HAL_OK)
   {
+	FcdEEpromEmFailStatus |= FcdFlashError;
     return FlashStatus;
   }
 
@@ -492,12 +510,13 @@ static HAL_StatusTypeDef EE_Format(void)
   /* Erase Page1 */
   if(!EE_VerifyPageFullyErased(PAGE1_BASE_ADDRESS))
   {
-	  HAL_FLASH_Unlock();
+	HAL_FLASH_Unlock();
     FlashStatus = HAL_FLASHEx_Erase(&pEraseInit, &SectorError);
     HAL_FLASH_Lock();
     /* If erase operation was failed, a Flash error code is returned */
     if (FlashStatus != HAL_OK)
     {
+      FcdEEpromEmFailStatus |= FcdFlashError;
       return FlashStatus;
     }
   }
@@ -558,6 +577,7 @@ static uint16_t EE_FindValidPage(uint8_t Operation)
       }
       else
       {
+    	FcdEEpromEmFailStatus |= FcdEEprmNoValidPageError;
         return NO_VALID_PAGE;   /* No valid Page */
       }
 
@@ -572,6 +592,7 @@ static uint16_t EE_FindValidPage(uint8_t Operation)
       }
       else
       {
+    	FcdEEpromEmFailStatus |= FcdEEprmNoValidPageError;
         return NO_VALID_PAGE ;  /* No valid Page */
       }
 
@@ -684,6 +705,7 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   }
   else
   {
+
     return NO_VALID_PAGE;       /* No valid Page */
   }
 
@@ -694,6 +716,7 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
   /* If program operation was failed, a Flash error code is returned */
   if (FlashStatus != HAL_OK)
   {
+
     return FlashStatus;
   }
 
@@ -776,6 +799,7 @@ uint16_t EE_ReadBlockInEEm(struct CAL_PARAM_tag *p,uint16_t blockSize,uint16_t V
   /* Check if there is no valid page */
   if (ValidPage == NO_VALID_PAGE)
   {
+	FcdEEpromEmFailStatus |= FcdEEprmNoValidPageError;
     return  NO_VALID_PAGE;
   }
 
@@ -804,7 +828,7 @@ uint16_t EE_ReadBlockInEEm(struct CAL_PARAM_tag *p,uint16_t blockSize,uint16_t V
 
       /* In case variable value is read, reset ReadStatus flag */
       ReadStatus = 0;
-
+      FcdEEpromEmFailStatus &= ~FcdEEprmStructNotFoundError;
       break;
     }
     else
@@ -840,6 +864,7 @@ static uint16_t EE_VerifyPageFullWriteBlock(uint16_t blockSize, void *p)
   /* Check if there is no valid page */
   if (ValidPage == NO_VALID_PAGE)
   {
+	FcdEEpromEmFailStatus |= FcdEEprmNoValidPageError;
     return  NO_VALID_PAGE;
   }
 
@@ -865,6 +890,7 @@ static uint16_t EE_VerifyPageFullWriteBlock(uint16_t blockSize, void *p)
 		FlashStatus +=i;*/
 		if (FlashStatus != HAL_OK)
       {
+		FcdEEpromEmFailStatus |= FcdFlashError;
         return FlashStatus;
       }
       /* Set Status to valid */
@@ -969,6 +995,7 @@ static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize)
   }
   else
   {
+	FcdEEpromEmFailStatus |= FcdEEprmNoValidPageError;
     return NO_VALID_PAGE;       /* No valid Page */
   }
 
@@ -979,6 +1006,7 @@ static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize)
   /* If program operation was failed, a Flash error code is returned */
   if (FlashStatus != HAL_OK)
   {
+	FcdEEpromEmFailStatus |= FcdFlashError;
     return FlashStatus;
   }
 
@@ -1023,6 +1051,7 @@ static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize)
   /* If erase operation was failed, a Flash error code is returned */
   if (FlashStatus != HAL_OK)
   {
+	FcdEEpromEmFailStatus |= FcdFlashError;
     return FlashStatus;
   }
 
@@ -1033,6 +1062,7 @@ static uint16_t EE_PageTransferWriteBlock(void *p, uint16_t blockSize)
   /* If program operation was failed, a Flash error code is returned */
   if (FlashStatus != HAL_OK)
   {
+	FcdEEpromEmFailStatus |= FcdFlashError;
     return FlashStatus;
   }
 
